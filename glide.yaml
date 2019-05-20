@@ -7,4 +7,4 @@ import:
 - package: golang.org/x/net
   subpackages:
   - websocket
-- package: github.com/jdel/logspout-slack
+- package: github.com/semanticdreamer/logspout-slack

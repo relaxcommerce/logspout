@@ -1,5 +1,5 @@
-hash: 6d57f3d6730b96a3beadce55a9275e9a597396236e09eba691b872b49344bfe2
-updated: 2019-05-20T16:10:24.464975368+02:00
+hash: 4ad15c9961be60b234d219d3ff52108b0b8fc5d7912ce858cdcd43851e5af011
+updated: 2019-05-20T16:56:45.058645332+02:00
 imports:
 - name: github.com/docker/docker
   version: ad969f1aa782478725a7f338cf963fa82f484609
@@ -35,17 +35,13 @@ imports:
 - name: github.com/jdel/logspout-slack
   version: 9101b05c51883c1426d4fed5be2db17e682736f2
 - name: github.com/nlopes/slack
-  version: e2954b1409b0228b16a1ac3515a036a3f2f4aac1
-  subpackages:
-  - internal/errorsx
-  - internal/timex
-  - slackutilsx
+  version: 8ab4d0b364ef1e9af5d102531da20d5ec902b6c4
 - name: github.com/opencontainers/runc
   version: 9d7831e41d3ef428b67685eeb27f2b4a22a92391
   subpackages:
   - libcontainer/user
-- name: github.com/pkg/errors
-  version: 27936f6d90f9c8e1145f11ed52ffffbfdb9e0af7
+- name: github.com/semanticdreamer/logspout-slack
+  version: 969cd7404722e44b44bcee3f136706b42d3dd9d4
 - name: github.com/Sirupsen/logrus
   version: f3cfb454f4c209e6668c95216c4744b8fddb2356
 - name: golang.org/x/net
