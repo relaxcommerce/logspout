@@ -2,9 +2,9 @@ package: github.com/gliderlabs/logspout
 excludeDirs:
 - custom
 import:
-- package: github.com/jdel/logspout-slack
 - package: github.com/fsouza/go-dockerclient
 - package: github.com/gorilla/mux
 - package: golang.org/x/net
   subpackages:
   - websocket
+- package: github.com/jdel/logspout-slack
