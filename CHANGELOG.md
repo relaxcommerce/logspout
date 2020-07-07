@@ -10,6 +10,51 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+## [v3.2.11] - 2020-05-8
+### Added
+- @hhromic Add Syslog TCP framing documentation to README
+
+### Changed
+- @hhromic syslog adapter refactor
+- @michaelshobbs use type assertion instead of reflection to determine connection type
+- @michaelshobbs use // + space for all human readable comments
+
+## [v3.2.10] - 2020-05-1
+### Added
+- @jszwedko Add optional TCP framing to syslog adapter
+
+### Fixed
+- @bbigras add missing syntax highlighting in README.md
+
+## [v3.2.9] - 2020-04-30
+### Fixed
+- @bbigras add missing syntax highlighting in README.md
+
+### Added
+- @edorgeville Adds `db` log driver to `logDriverSupported`
+- @renehernandez Add support for multiple exclusion labels
+- @renehernandez Add support for EXCLUDE_LABELS envvar with fallback to existing EXCLUDE_LABEL
+- @hhromic adapters/syslog: add ContainerNameSplitN utility message function
+
+### Changed
+- @hhromic adapters/syslog: enforce RFC size limits in message fields
+
+## [v3.2.8] - 2020-04-03
+### Changed
+- @michaelshobbs bump alpine to 3.11 and go to 1.13.4-r1
+
+## [v3.2.7] - 2020-04-03
+### Fixed
+- @CodeLingoBot @gbolo Fix function comments based on best practices from Effective Go
+
+### Changed
+- @michaelshobbs update alpine to 3.10/go 1.12.12-r0 and fix linting
+- @whoisteri DOC Document accessible data in RAW_FORMAT template
+- @tiagorlampert DOC typos
+- @michaelshobbs DOC CHANGLELOG formatting
+- @tomlankhorst DOC Suggest to disable userns-remap for logspout
+- @StudioEtrange DOC add link to logspout-fluentd
+
 ## [v3.2.6] - 2018-10-04
 ### Fixed
 - @jdgiotta Spelling corrections and fixed stack compose formatting in example
@@ -198,7 +243,12 @@ All notable changes to this project will be documented in this file.
 - Base container is now Alpine
 - Moved to gliderlabs organization
 
-[unreleased]: https://github.com/gliderlabs/logspout/compare/v3.2.6...HEAD
+[unreleased]: https://github.com/gliderlabs/logspout/compare/v3.2.11...HEAD
+[v3.2.11]: https://github.com/gliderlabs/logspout/compare/v3.2.10...v3.2.11
+[v3.2.10]: https://github.com/gliderlabs/logspout/compare/v3.2.9...v3.2.10
+[v3.2.9]: https://github.com/gliderlabs/logspout/compare/v3.2.8...v3.2.9
+[v3.2.8]: https://github.com/gliderlabs/logspout/compare/v3.2.7...v3.2.8
+[v3.2.7]: https://github.com/gliderlabs/logspout/compare/v3.2.6...v3.2.7
 [v3.2.6]: https://github.com/gliderlabs/logspout/compare/v3.2.5...v3.2.6
 [v3.2.5]: https://github.com/gliderlabs/logspout/compare/v3.2.4...v3.2.5
 [v3.2.4]: https://github.com/gliderlabs/logspout/compare/v3.2.3...v3.2.4

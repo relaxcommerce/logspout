@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"reflect"
 	"text/template"
 
 	"github.com/gliderlabs/logspout/router"
@@ -21,7 +20,7 @@ var funcs = template.FuncMap{
 	"toJSON": func(value interface{}) string {
 		bytes, err := json.Marshal(value)
 		if err != nil {
-			log.Println("error marshalling to JSON: ", err)
+			log.Println("error marshaling to JSON: ", err)
 			return "null"
 		}
 		return string(bytes)
@@ -69,11 +68,10 @@ func (a *Adapter) Stream(logstream chan *router.Message) {
 			log.Println("raw:", err)
 			return
 		}
-		//log.Println("debug:", buf.String())
 		_, err = a.conn.Write(buf.Bytes())
 		if err != nil {
 			log.Println("raw:", err)
-			if reflect.TypeOf(a.conn).String() != "*net.UDPConn" {
+			if _, ok := a.conn.(*net.UDPConn); !ok {
 				return
 			}
 		}

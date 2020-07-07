@@ -53,6 +53,17 @@ Or, by adding a label which you define by setting an environment variable when r
         gliderlabs/logspout
     $ docker run -d --label logspout.exclude=true image
 
+Logspout also allows to ignore containers by specifying a list of labels using the environment variables `EXCLUDE_LABELS` or `EXCLUDE_LABEL`, using the `;` as separator:
+
+    $ $ docker run --name="logspout" \
+        -e EXCLUDE_LABELS=k8s:app;backend:rails;io.kubernetes.pod.namespace:default \
+        --volume=/var/run/docker.sock:/var/run/docker.sock \
+        gliderlabs/logspout
+    $ docker run -d --label k8s=app image1
+    $ docker run -d --label backend=rails image2
+
+**NOTE** Setting `EXCLUDE_LABELS` would take precedence over setting `EXCLUDE_LABEL`
+
 #### Including specific containers
 
 You can tell logspout to only include certain containers by setting filter parameters on the URI:
@@ -183,6 +194,7 @@ If you use multiline logging with raw, it's recommended to json encode the Data 
 * `SYSLOG_PRIORITY` - datum for priority field (default `{{.Priority}}`)
 * `SYSLOG_STRUCTURED_DATA` - datum for structured data field
 * `SYSLOG_TAG` - datum for tag field (default `{{.ContainerName}}+route.Options["append_tag"]`)
+* `SYSLOG_TCP_FRAMING` - for TCP or TLS transports, whether to use `octet-counted` framing in emitted messages or `traditional` LF framing (default `traditional`)
 * `SYSLOG_TIMESTAMP` - datum for timestamp field (default `{{.Timestamp}}`)
 * `MULTILINE_ENABLE_DEFAULT` - enable multiline logging for all containers when using the multiline adapter (default `true`)
 * `MULTILINE_MATCH` - determines which lines the pattern should match, one of first|last|nonfirst|nonlast, for details see: [MULTILINE_MATCH](#multiline_match) (default `nonfirst`)
@@ -193,6 +205,14 @@ If you use multiline logging with raw, it's recommended to json encode the Data 
 #### Raw Format
 
 The raw adapter has a function `toJSON` that can be used to format the message/fields to generate JSON-like output in a simple way, or full JSON output.
+
+The RAW_FORMAT env variable is used as a [Go template](https://golang.org/pkg/text/template/) with a [`Message` struct](https://github.com/gliderlabs/logspout/blob/master/router/types.go#L52) passed as data. You can access the following fields
+
+* `Source` - source stream name ("stdout", "stderr", ...)
+* `Data` - original log message 
+* `Time` - a Go [`Time` struct](https://golang.org/pkg/time/#Time)
+* `Container` - a [go-dockerclient](https://github.com/fsouza/go-dockerclient) `Container` struct (see [container.go](https://github.com/fsouza/go-dockerclient/blob/master/container.go#L443) source file for accessible fields)
+
 
 Use examples:
 
@@ -231,11 +251,27 @@ Use examples:
 
 ```
 
+#### Syslog TCP Framing
+
+When using a TCP or TLS transport with the Syslog adapter, it is possible to add octet-counting to the emitted frames as described in [RFC6587 (Syslog over TCP) 3.4.1](https://tools.ietf.org/html/rfc6587#section-3.4.1) and [RFC5424 (Syslog over TLS)](https://tools.ietf.org/html/rfc5424).
+
+This prefixes each message with the length of the message to allow consumers to easily determine where the message ends (rather than traditional LF framing). This also enables multiline Syslog messages without escaping.
+
+To enable octet-counted framing for Syslog over TCP or TLS, use the `SYSLOG_TCP_FRAMING` environment variable:
+
+    $ docker run --name="logspout" \
+        -e SYSLOG_TCP_FRAMING=octet-counted \
+        --volume=/var/run/docker.sock:/var/run/docker.sock \
+        gliderlabs/logspout \
+        syslog+tcp://logs.papertrailapp.com:55555
+
+> NOTE: The default is to use traditional LF framing for backwards compatibility though octet-counted framing is preferred when it is known the downstream consumer can handle it.
+
 #### Using Logspout in a swarm
 
 In a swarm, logspout is best deployed as a global service.  When running logspout with 'docker run', you can change the value of the hostname field using the `SYSLOG_HOSTNAME` environment variable as explained above. However, this does not work in a compose file because the value for `SYSLOG_HOSTNAME` will be the same for all logspout "tasks", regardless of the docker host on which they run. To support this mode of deployment, the syslog adapter will look for the file `/etc/host_hostname` and, if the file exists and it is not empty, will configure the hostname field with the content of this file. You can then use a volume mount to map a file on the docker hosts with the file `/etc/host_hostname` in the container.  The sample compose file below illustrates how this can be done
 
-```
+```yml
 version: "3"
 networks:
   logging:
@@ -275,9 +311,9 @@ logspout supports modification of the client TLS settings via environment variab
 | Environment Variable  | Description |
 | :---                  |  :---       |
 | `LOGSPOUT_TLS_DISABLE_SYSTEM_ROOTS` | when set to `true` it disables loading the system trust store into the trust store of logspout |
-| `LOGSPOUT_TLS_CA_CERTS` | a comma seperated list of filesystem paths to pem encoded CA certificates that should be added to logsput's TLS trust store. Each pem file can contain more than one certificate |
-| `LOGSPOUT_TLS_CLIENT_CERT` | filesytem path to pem encoded x509 client certificate to load when TLS mutual authentication is desired |
-| `LOGSPOUT_TLS_CLIENT_KEY` | filesytem path to pem encoded client private key to load when TLS mutual authentication is desired |
+| `LOGSPOUT_TLS_CA_CERTS` | a comma separated list of filesystem paths to pem encoded CA certificates that should be added to logsput's TLS trust store. Each pem file can contain more than one certificate |
+| `LOGSPOUT_TLS_CLIENT_CERT` | filesystem path to pem encoded x509 client certificate to load when TLS mutual authentication is desired |
+| `LOGSPOUT_TLS_CLIENT_KEY` | filesystem path to pem encoded client private key to load when TLS mutual authentication is desired |
 | `LOGSPOUT_TLS_HARDENING` | when set to `true` it enables stricter client TLS settings designed to mitigate some known TLS vulnerabilities |
 
 #### Example TLS settings
@@ -331,6 +367,8 @@ The standard distribution of logspout comes with all modules defined in this rep
  * [logspout-logstash](https://github.com/looplab/logspout-logstash)
  * [logspout-redis-logstash](https://github.com/rtoma/logspout-redis-logstash)
  * [logspout-gelf](https://github.com/micahhausler/logspout-gelf) for Graylog
+ * [logspout-fluentd](https://github.com/dsouzajude/logspout-fluentd) for fluentd or fluent-bit - instead of using fluentd log driver
+ 
 
 ### Loggly support
 
